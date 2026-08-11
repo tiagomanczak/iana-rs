@@ -1,0 +1,13 @@
+[package]
+name = "iana-rats"
+version = "0.1.0"
+edition = "2024"
+description = "IANA RATS (Remote Attestation Procedures) registry definitions"
+license = "MIT OR Apache-2.0"
+
+[package.metadata.iana]
+snapshot = "2026-07-20"
+
+[dependencies]
+
+[dev-dependencies]

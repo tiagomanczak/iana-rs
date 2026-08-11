@@ -1,0 +1,79 @@
+name: Sync IANA registries
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "iana-suit/src/**"
+      - "tools/iana-sync/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/iana-sync.yml"
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check IANA definitions
+        run: cargo run -p iana-sync -- check
+
+      - name: Run tests
+        run: cargo test --workspace
+
+  sync:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Update IANA definitions
+        run: cargo run -p iana-sync -- update
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Check synchronized definitions
+        run: cargo run -p iana-sync -- check
+
+      - name: Run tests
+        run: cargo test --workspace
+
+      - name: Open or update synchronization PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/iana-sync
+          base: ${{ github.event.repository.default_branch }}
+          delete-branch: true
+          title: "chore: sync IANA registries"
+          commit-message: "chore: sync IANA registries"
+          body: |
+            Updates generated SUIT definitions from the official IANA CSV registries.
+
+            The Rust synchronizer runs in check mode on this pull request.
+          add-paths: |
+            iana-suit/src/**

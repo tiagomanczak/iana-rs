@@ -1,0 +1,13 @@
+[package]
+name = "iana-suit"
+version = "0.1.0"
+edition = "2024"
+description = "IANA SUIT (Software Update for the Internet of Things) registry definitions"
+license = "MIT OR Apache-2.0"
+
+[package.metadata.iana]
+snapshot = "2026-02-17"
+
+[dependencies]
+
+[dev-dependencies]

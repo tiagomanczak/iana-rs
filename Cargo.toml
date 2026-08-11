@@ -1,0 +1,3 @@
+[workspace]
+members = ["iana-suit", "iana-rats", "tools/iana-sync"]
+resolver = "2"
