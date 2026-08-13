@@ -26,6 +26,7 @@ struct Registry {
 enum IntegerType {
     I32,
     I64,
+    U8,
     U64,
     I128,
 }
@@ -35,6 +36,7 @@ impl IntegerType {
         match self {
             Self::I32 => "i32",
             Self::I64 => "i64",
+            Self::U8 => "u8",
             Self::U64 => "u64",
             Self::I128 => "i128",
         }
@@ -159,7 +161,7 @@ const REGISTRIES: &[Registry] = &[
         snapshot: iana_cbor::IANA_SNAPSHOT,
         label_column: 0,
         name_column: 1,
-        integer: IntegerType::U64,
+        integer: IntegerType::U8,
         is_known: cbor_simple_values_is_known,
     },
     Registry {
@@ -179,7 +181,7 @@ const REGISTRIES: &[Registry] = &[
         snapshot: iana_cbor::IANA_SNAPSHOT,
         label_column: 1,
         name_column: 0,
-        integer: IntegerType::U64,
+        integer: IntegerType::U8,
         is_known: cbor_timescales_is_known,
     },
     Registry {
@@ -228,13 +230,13 @@ fn suit_capability_report_is_known(label: i128) -> bool {
     i32::try_from(label).map_or(false, iana_suit::capability_report::is_known)
 }
 fn cbor_simple_values_is_known(label: i128) -> bool {
-    u64::try_from(label).map_or(false, iana_cbor::simple_values::is_known)
+    u8::try_from(label).map_or(false, iana_cbor::simple_values::is_known)
 }
 fn cbor_tags_is_known(label: i128) -> bool {
     u64::try_from(label).map_or(false, iana_cbor::tags::is_known)
 }
 fn cbor_timescales_is_known(label: i128) -> bool {
-    u64::try_from(label).map_or(false, iana_cbor::timescales::is_known)
+    u8::try_from(label).map_or(false, iana_cbor::timescales::is_known)
 }
 fn cbor_time_tag_map_keys_is_known(label: i128) -> bool {
     iana_cbor::time_tag_map_keys::is_known(label)
@@ -510,8 +512,9 @@ fn source_labels(source: &str, registry: &Registry) -> Result<BTreeMap<i128, Str
         };
         if rust_type.trim() != registry.integer.rust_name() {
             return Err(SyncError(format!(
-                "{}: constant {name} must use {}",
+                "{}: constant {name} has type {} but expected {}",
                 registry.name,
+                rust_type.trim(),
                 registry.integer.rust_name()
             )));
         }
@@ -620,9 +623,10 @@ fn parse_label(raw: &str, integer: IntegerType) -> Option<i128> {
     match integer {
         IntegerType::I32 if i32::try_from(value).is_err() => None,
         IntegerType::I64 if i64::try_from(value).is_err() => None,
+        IntegerType::U8 if u8::try_from(value).is_err() => None,
         IntegerType::U64 if u64::try_from(value).is_err() => None,
         IntegerType::I128 => Some(value),
-        IntegerType::I32 | IntegerType::I64 | IntegerType::U64 => Some(value),
+        IntegerType::I32 | IntegerType::I64 | IntegerType::U8 | IntegerType::U64 => Some(value),
     }
 }
 

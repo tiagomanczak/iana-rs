@@ -13,6 +13,9 @@ See [ROADMAP.md](ROADMAP.md) for planned future milestones.
 - `ROADMAP.md` at workspace root documenting all planned milestones through v1.0.0
 
 ### Changed
+- `iana-cbor`: `simple_values` constants changed from `u64` to `u8` — CBOR simple values are capped at 255 by spec and embedded decoders return `u8`; avoids redundant cast at call site
+- `iana-cbor`: `timescales` constants changed from `u64` to `u8` — same rationale; only values 0 and 1 are assigned
+- `tools/iana-sync`: added `IntegerType::U8` variant; `parse_label` and registry entries updated accordingly
 - `tools/iana-sync`: removed `pub mod label` wrapper from all registry modules — constants are now at module level (e.g. `iana_suit::commands::FETCH` instead of `iana_suit::commands::label::FETCH`)
 - `iana-suit`: label type changed from `i64` to `i32` — aligns with the signed integer range of SUIT CBOR map keys and avoids 64-bit software emulation on 32-bit MCU targets
 - `tools/iana-sync`: redesigned `check` command to use compiled `is_known()` predicates instead of source-text parsing — eliminates false positives from formatting changes
@@ -41,7 +44,7 @@ See [ROADMAP.md](ROADMAP.md) for planned future milestones.
 
 #### `iana-cbor`
 - 4 CBOR registry modules fully populated from IANA snapshot 2026-07-20: `simple_values`, `tags`, `timescales`, `time_tag_map_keys`
-- `tags` and `simple_values` typed as `u64`; `time_tag_map_keys` typed as `i128` (values outside `i64` range)
+- `tags` typed as `u64` (IANA has assigned tags above `u32::MAX`); `simple_values` and `timescales` typed as `u8` (spec-capped at 255, matches embedded decoder return type); `time_tag_map_keys` typed as `i128` (values outside `i64` range)
 - Hand-named constants: `tags::SUIT_ENVELOPE = 107`, `tags::SUIT_MANIFEST = 1070`, `simple_values::FALSE = 20`, `simple_values::TRUE = 21`, `simple_values::NULL = 22`, `simple_values::UNDEFINED = 23`
 - `is_known()` predicate in every module
 - `IANA_SNAPSHOT: &str` constant at crate root

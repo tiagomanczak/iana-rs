@@ -4,12 +4,12 @@
 
 /// CBOR Timescale values.
 /// UTC.
-pub const UTC: u64 = 0;
+pub const UTC: u8 = 0;
 /// TAI.
-pub const TAI: u64 = 1;
+pub const TAI: u8 = 1;
 
 /// Returns `true` if `value` is a currently assigned CBOR timescale.
 #[must_use]
-pub const fn is_known(value: u64) -> bool {
+pub const fn is_known(value: u8) -> bool {
     matches!(value, UTC | TAI)
 }
