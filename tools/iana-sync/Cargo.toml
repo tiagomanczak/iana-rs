@@ -7,3 +7,5 @@ description = "Development tool for checking and updating IANA registry definiti
 
 [dependencies]
 ureq = "2.12"
+iana-suit = { path = "../../iana-suit" }
+iana-cbor = { path = "../../iana-cbor" }
