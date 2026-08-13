@@ -28,49 +28,79 @@
 /// | 31    | Swap                  |
 /// | 32    | Run Sequence          |
 /// | 33    | Unlink                |
-pub mod label {
-    /// Unset Detection.
-    pub const UNSET_DETECTION: i64 = 0;
-    /// Vendor Identifier.
-    pub const VENDOR_IDENTIFIER: i64 = 1;
-    /// Class Identifier.
-    pub const CLASS_IDENTIFIER: i64 = 2;
-    /// Image Match.
-    pub const IMAGE_MATCH: i64 = 3;
-    /// Component Slot.
-    pub const COMPONENT_SLOT: i64 = 5;
-    /// Check Content.
-    pub const CHECK_CONTENT: i64 = 6;
-    /// Dependency Integrity.
-    pub const DEPENDENCY_INTEGRITY: i64 = 7;
-    /// Is Dependency.
-    pub const IS_DEPENDENCY: i64 = 8;
-    /// Process Dependency.
-    pub const PROCESS_DEPENDENCY: i64 = 11;
-    /// Set Component Index.
-    pub const SET_COMPONENT_INDEX: i64 = 12;
-    /// Abort.
-    pub const ABORT: i64 = 14;
-    /// Try Each.
-    pub const TRY_EACH: i64 = 15;
-    /// Write Content.
-    pub const WRITE_CONTENT: i64 = 18;
-    /// Set Parameters.
-    pub const SET_PARAMETERS: i64 = 19;
-    /// Override Parameters.
-    pub const OVERRIDE_PARAMETERS: i64 = 20;
-    /// Fetch.
-    pub const FETCH: i64 = 21;
-    /// Copy.
-    pub const COPY: i64 = 22;
-    /// Invoke.
-    pub const INVOKE: i64 = 23;
-    /// Device Identifier.
-    pub const DEVICE_IDENTIFIER: i64 = 24;
-    /// Swap.
-    pub const SWAP: i64 = 31;
-    /// Run Sequence.
-    pub const RUN_SEQUENCE: i64 = 32;
-    /// Unlink.
-    pub const UNLINK: i64 = 33;
+/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
+pub const UNSET_DETECTION: i32 = 0;
+/// Vendor Identifier.
+pub const VENDOR_IDENTIFIER: i32 = 1;
+/// Class Identifier.
+pub const CLASS_IDENTIFIER: i32 = 2;
+/// Image Match.
+pub const IMAGE_MATCH: i32 = 3;
+/// Component Slot.
+pub const COMPONENT_SLOT: i32 = 5;
+/// Check Content.
+pub const CHECK_CONTENT: i32 = 6;
+/// Dependency Integrity.
+pub const DEPENDENCY_INTEGRITY: i32 = 7;
+/// Is Dependency.
+pub const IS_DEPENDENCY: i32 = 8;
+/// Process Dependency.
+pub const PROCESS_DEPENDENCY: i32 = 11;
+/// Set Component Index.
+pub const SET_COMPONENT_INDEX: i32 = 12;
+/// Abort.
+pub const ABORT: i32 = 14;
+/// Try Each.
+pub const TRY_EACH: i32 = 15;
+/// Write Content.
+pub const WRITE_CONTENT: i32 = 18;
+/// Set Parameters.
+pub const SET_PARAMETERS: i32 = 19;
+/// Override Parameters.
+pub const OVERRIDE_PARAMETERS: i32 = 20;
+/// Fetch.
+pub const FETCH: i32 = 21;
+/// Copy.
+pub const COPY: i32 = 22;
+/// Invoke.
+pub const INVOKE: i32 = 23;
+/// Device Identifier.
+pub const DEVICE_IDENTIFIER: i32 = 24;
+/// Swap.
+pub const SWAP: i32 = 31;
+/// Run Sequence.
+pub const RUN_SEQUENCE: i32 = 32;
+/// Unlink.
+pub const UNLINK: i32 = 33;
+
+/// Returns `true` if `label` is a currently assigned SUIT Command label.
+///
+/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
+/// value, not a valid CBOR map key for encoding.
+#[must_use]
+pub const fn is_known(label: i32) -> bool {
+    matches!(
+        label,
+        VENDOR_IDENTIFIER
+            | CLASS_IDENTIFIER
+            | IMAGE_MATCH
+            | COMPONENT_SLOT
+            | CHECK_CONTENT
+            | DEPENDENCY_INTEGRITY
+            | IS_DEPENDENCY
+            | PROCESS_DEPENDENCY
+            | SET_COMPONENT_INDEX
+            | ABORT
+            | TRY_EACH
+            | WRITE_CONTENT
+            | SET_PARAMETERS
+            | OVERRIDE_PARAMETERS
+            | FETCH
+            | COPY
+            | INVOKE
+            | DEVICE_IDENTIFIER
+            | SWAP
+            | RUN_SEQUENCE
+            | UNLINK
+    )
 }

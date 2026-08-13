@@ -19,31 +19,50 @@
 /// | 10    | Condition Failed                  |
 /// | 11    | Operation Failed                  |
 /// | 12    | Invocation Pending                |
-pub mod label {
-    /// Result OK.
-    pub const RESULT_OK: i64 = 0;
-    /// CBOR Parse Failure.
-    pub const CBOR_PARSE_FAILURE: i64 = 1;
-    /// Unsupported COSE Structure or Header.
-    pub const UNSUPPORTED_COSE_STRUCTURE_OR_HEADER: i64 = 2;
-    /// Unsupported COSE Algorithm.
-    pub const UNSUPPORTED_COSE_ALGORITHM: i64 = 3;
-    /// Signature / MAC verification failed.
-    pub const SIGNATURE_MAC_VERIFICATION_FAILED: i64 = 4;
-    /// Unsupported SUIT Command.
-    pub const UNSUPPORTED_SUIT_COMMAND: i64 = 5;
-    /// Unsupported SUIT Component.
-    pub const UNSUPPORTED_SUIT_COMPONENT: i64 = 6;
-    /// Unauthorized SUIT Component.
-    pub const UNAUTHORIZED_SUIT_COMPONENT: i64 = 7;
-    /// Unsupported SUIT Parameter.
-    pub const UNSUPPORTED_SUIT_PARAMETER: i64 = 8;
-    /// Severing Unsupported.
-    pub const SEVERING_UNSUPPORTED: i64 = 9;
-    /// Condition Failed.
-    pub const CONDITION_FAILED: i64 = 10;
-    /// Operation Failed.
-    pub const OPERATION_FAILED: i64 = 11;
-    /// Invocation Pending.
-    pub const INVOCATION_PENDING: i64 = 12;
+/// Result OK.
+pub const RESULT_OK: i32 = 0;
+/// CBOR Parse Failure.
+pub const CBOR_PARSE_FAILURE: i32 = 1;
+/// Unsupported COSE Structure or Header.
+pub const UNSUPPORTED_COSE_STRUCTURE_OR_HEADER: i32 = 2;
+/// Unsupported COSE Algorithm.
+pub const UNSUPPORTED_COSE_ALGORITHM: i32 = 3;
+/// Signature / MAC verification failed.
+pub const SIGNATURE_MAC_VERIFICATION_FAILED: i32 = 4;
+/// Unsupported SUIT Command.
+pub const UNSUPPORTED_SUIT_COMMAND: i32 = 5;
+/// Unsupported SUIT Component.
+pub const UNSUPPORTED_SUIT_COMPONENT: i32 = 6;
+/// Unauthorized SUIT Component.
+pub const UNAUTHORIZED_SUIT_COMPONENT: i32 = 7;
+/// Unsupported SUIT Parameter.
+pub const UNSUPPORTED_SUIT_PARAMETER: i32 = 8;
+/// Severing Unsupported.
+pub const SEVERING_UNSUPPORTED: i32 = 9;
+/// Condition Failed.
+pub const CONDITION_FAILED: i32 = 10;
+/// Operation Failed.
+pub const OPERATION_FAILED: i32 = 11;
+/// Invocation Pending.
+pub const INVOCATION_PENDING: i32 = 12;
+
+/// Returns `true` if `label` is a currently assigned SUIT Report Reason label.
+#[must_use]
+pub const fn is_known(label: i32) -> bool {
+    matches!(
+        label,
+        RESULT_OK
+            | CBOR_PARSE_FAILURE
+            | UNSUPPORTED_COSE_STRUCTURE_OR_HEADER
+            | UNSUPPORTED_COSE_ALGORITHM
+            | SIGNATURE_MAC_VERIFICATION_FAILED
+            | UNSUPPORTED_SUIT_COMMAND
+            | UNSUPPORTED_SUIT_COMPONENT
+            | UNAUTHORIZED_SUIT_COMPONENT
+            | UNSUPPORTED_SUIT_PARAMETER
+            | SEVERING_UNSUPPORTED
+            | CONDITION_FAILED
+            | OPERATION_FAILED
+            | INVOCATION_PENDING
+    )
 }

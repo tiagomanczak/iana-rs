@@ -11,15 +11,25 @@
 /// | 2     | Update Description   |
 /// | 3     | Manifest JSON Source |
 /// | 4     | Manifest YAML Source |
-pub mod label {
-    /// Unset Detection.
-    pub const UNSET_DETECTION: i64 = 0;
-    /// Manifest Description.
-    pub const MANIFEST_DESCRIPTION: i64 = 1;
-    /// Update Description.
-    pub const UPDATE_DESCRIPTION: i64 = 2;
-    /// Manifest JSON Source.
-    pub const MANIFEST_JSON_SOURCE: i64 = 3;
-    /// Manifest YAML Source.
-    pub const MANIFEST_YAML_SOURCE: i64 = 4;
+/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
+pub const UNSET_DETECTION: i32 = 0;
+/// Manifest Description.
+pub const MANIFEST_DESCRIPTION: i32 = 1;
+/// Update Description.
+pub const UPDATE_DESCRIPTION: i32 = 2;
+/// Manifest JSON Source.
+pub const MANIFEST_JSON_SOURCE: i32 = 3;
+/// Manifest YAML Source.
+pub const MANIFEST_YAML_SOURCE: i32 = 4;
+
+/// Returns `true` if `label` is a currently assigned SUIT Text Value label.
+///
+/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
+/// value, not a valid CBOR map key for encoding.
+#[must_use]
+pub const fn is_known(label: i32) -> bool {
+    matches!(
+        label,
+        MANIFEST_DESCRIPTION | UPDATE_DESCRIPTION | MANIFEST_JSON_SOURCE | MANIFEST_YAML_SOURCE
+    )
 }

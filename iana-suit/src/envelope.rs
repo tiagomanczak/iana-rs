@@ -15,23 +15,57 @@
 /// | 18    | Candidate Verification |
 /// | 20    | Payload Installation   |
 /// | 23    | Text Description       |
-pub mod label {
-    /// Unset Detection.
-    pub const UNSET_DETECTION: i64 = 0;
-    /// Reserved (Delegation).
-    pub const DELEGATION: i64 = 1;
-    /// Authentication Wrapper.
-    pub const AUTHENTICATION_WRAPPER: i64 = 2;
-    /// Manifest.
-    pub const MANIFEST: i64 = 3;
-    /// Dependency Resolution.
-    pub const DEPENDENCY_RESOLUTION: i64 = 15;
-    /// Payload Fetch.
-    pub const PAYLOAD_FETCH: i64 = 16;
-    /// Candidate Verification.
-    pub const CANDIDATE_VERIFICATION: i64 = 18;
-    /// Payload Installation.
-    pub const PAYLOAD_INSTALLATION: i64 = 20;
-    /// Text Description.
-    pub const TEXT_DESCRIPTION: i64 = 23;
+/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
+pub const UNSET_DETECTION: i32 = 0;
+/// Reserved (Delegation).
+pub const DELEGATION: i32 = 1;
+/// Authentication Wrapper.
+pub const AUTHENTICATION_WRAPPER: i32 = 2;
+/// Manifest.
+pub const MANIFEST: i32 = 3;
+/// Dependency Resolution.
+pub const DEPENDENCY_RESOLUTION: i32 = 15;
+/// Payload Fetch.
+pub const PAYLOAD_FETCH: i32 = 16;
+/// Candidate Verification.
+pub const CANDIDATE_VERIFICATION: i32 = 18;
+/// Payload Installation.
+pub const PAYLOAD_INSTALLATION: i32 = 20;
+/// Text Description.
+pub const TEXT_DESCRIPTION: i32 = 23;
+
+/// Returns `true` if `label` is a currently assigned SUIT Envelope Element label.
+///
+/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
+/// value, not a valid CBOR map key for encoding.
+#[must_use]
+pub const fn is_known(label: i32) -> bool {
+    matches!(
+        label,
+        DELEGATION
+            | AUTHENTICATION_WRAPPER
+            | MANIFEST
+            | DEPENDENCY_RESOLUTION
+            | PAYLOAD_FETCH
+            | CANDIDATE_VERIFICATION
+            | PAYLOAD_INSTALLATION
+            | TEXT_DESCRIPTION
+    )
+}
+
+/// SUIT Envelope CBOR tag values.
+///
+/// | Tag | Name          |
+/// |-----|---------------|
+/// | 107 | SUIT Envelope |
+pub mod tag {
+
+    /// SUIT Envelope.
+    pub const SUIT_ENVELOPE: i32 = 107;
+
+    /// Returns `true` if `label` is a currently assigned SUIT Envelope tag.
+    #[must_use]
+    pub const fn is_known(label: i32) -> bool {
+        matches!(label, SUIT_ENVELOPE)
+    }
 }
