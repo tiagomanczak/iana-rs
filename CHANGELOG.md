@@ -1,0 +1,69 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+See [ROADMAP.md](ROADMAP.md) for planned future milestones.
+
+## [Unreleased]
+
+### Added
+- `ROADMAP.md` at workspace root documenting all planned milestones through v1.0.0
+
+### Changed
+- `tools/iana-sync`: removed `pub mod label` wrapper from all registry modules — constants are now at module level (e.g. `iana_suit::commands::FETCH` instead of `iana_suit::commands::label::FETCH`)
+- `iana-suit`: label type changed from `i64` to `i32` — aligns with the signed integer range of SUIT CBOR map keys and avoids 64-bit software emulation on 32-bit MCU targets
+- `tools/iana-sync`: redesigned `check` command to use compiled `is_known()` predicates instead of source-text parsing — eliminates false positives from formatting changes
+- `tools/iana-sync`: added HTTP HEAD fast-check using `Last-Modified` header — avoids full CSV download when registry snapshot is current
+- `tools/iana-sync`: added 15-second timeout on all HTTP requests
+- `tools/iana-sync`: added path dependencies on `iana-suit` and `iana-cbor` for compiled-constant validation
+
+### Removed
+- `metadata.rs` modules from `iana-suit`, `iana-cbor`, and `iana-rats` — replaced by a single `IANA_SNAPSHOT: &str` constant at crate root
+- Redundant re-exports `PACKAGE_NAME`, `PACKAGE_VERSION`, `VERSION`, `IANA_REGISTRY_SNAPSHOT` — use `env!("CARGO_PKG_NAME")` / `env!("CARGO_PKG_VERSION")` directly
+- `[package.metadata.iana]` tables from all `Cargo.toml` files — `IANA_SNAPSHOT` in `src/lib.rs` is the single source of truth
+
+---
+
+## [0.1.0] — Unreleased
+
+### Added
+
+#### `iana-suit`
+- 11 SUIT registry modules fully populated from IANA snapshot 2026-02-17: `envelope`, `manifest`, `common`, `commands`, `parameters`, `text`, `component_text`, `report`, `record`, `report_reasons`, `capability_report`
+- All labels typed as `i32`
+- `is_known(label: i32) -> bool` `const fn` predicate in every module; `UNSET_DETECTION` (value `0`) intentionally excluded — it is a sentinel, not a valid CBOR map key (RFC-ietf-suit-manifest-34 §8.1)
+- `IANA_SNAPSHOT: &str` constant at crate root
+- Exhaustive per-module regression tests for all constant values
+- `#![no_std]`, `#![forbid(unsafe_code)]`
+
+#### `iana-cbor`
+- 4 CBOR registry modules fully populated from IANA snapshot 2026-07-20: `simple_values`, `tags`, `timescales`, `time_tag_map_keys`
+- `tags` and `simple_values` typed as `u64`; `time_tag_map_keys` typed as `i128` (values outside `i64` range)
+- Hand-named constants: `tags::SUIT_ENVELOPE = 107`, `tags::SUIT_MANIFEST = 1070`, `simple_values::FALSE = 20`, `simple_values::TRUE = 21`, `simple_values::NULL = 22`, `simple_values::UNDEFINED = 23`
+- `is_known()` predicate in every module
+- `IANA_SNAPSHOT: &str` constant at crate root
+- `#![no_std]`, `#![forbid(unsafe_code)]`
+
+#### `iana-rats`
+- Skeleton crate with `eat_intended_uses` and `cmw_indicators` module stubs
+- Constants pending IANA CSV availability (tracked in [ROADMAP.md](ROADMAP.md) — v0.3.0)
+- `IANA_SNAPSHOT: &str` constant at crate root
+- `#![no_std]`, `#![forbid(unsafe_code)]`
+
+#### `tools/iana-sync`
+- `check` command: downloads IANA CSVs and validates all 15 registries against compiled `is_known()` predicates
+- `update` command: appends missing constants to registry source files; never removes stale entries
+- Stable-name override map for hand-named constants (e.g. CBOR tag 107 → `SUIT_ENVELOPE`)
+- Per-registry `snapshot` field for HEAD fast-check
+- Unit tests for `parse_csv`, `source_labels`, `constant_name`, `parse_last_modified_date`
+
+#### Workspace
+- GitHub Actions workflow: PR validation (`check`, `clippy`, `cargo doc`, `thumbv7em-none-eabihf` no_std check) and weekly scheduled sync with automatic PR creation
+- `LICENSE-MIT` and `LICENSE-APACHE` at workspace root
+- `AGENTS.md` — development conventions for AI-assisted and human contributors
+- `rust-version = "1.85"`, `repository`, `keywords`, `categories` in all published crate manifests
+- `[workspace.lints]`: `missing_docs = "warn"`, `clippy::pedantic = "warn"`
+- Per-crate `README.md` files
