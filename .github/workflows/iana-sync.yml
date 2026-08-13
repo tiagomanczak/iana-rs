@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - "iana-suit/src/**"
+      - "iana-cbor/src/**"
       - "tools/iana-sync/**"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -36,6 +37,20 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
+      - name: Lint
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Docs
+        run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+
+      - name: no_std check (thumbv7em-none-eabihf)
+        run: |
+          rustup target add thumbv7em-none-eabihf
+          cargo check --target thumbv7em-none-eabihf -p iana-suit
+          cargo check --target thumbv7em-none-eabihf -p iana-cbor
+
   sync:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -54,11 +69,14 @@ jobs:
       - name: Update IANA definitions
         run: cargo run -p iana-sync -- update
 
-      - name: Check formatting
-        run: cargo fmt --all -- --check
+      - name: Format generated definitions
+        run: cargo fmt --all
 
       - name: Check synchronized definitions
         run: cargo run -p iana-sync -- check
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
       - name: Run tests
         run: cargo test --workspace
@@ -72,8 +90,9 @@ jobs:
           title: "chore: sync IANA registries"
           commit-message: "chore: sync IANA registries"
           body: |
-            Updates generated SUIT definitions from the official IANA CSV registries.
+            Updates generated SUIT and CBOR definitions from the official IANA CSV registries.
 
             The Rust synchronizer runs in check mode on this pull request.
           add-paths: |
             iana-suit/src/**
+            iana-cbor/src/**
