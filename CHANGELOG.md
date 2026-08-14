@@ -10,9 +10,17 @@ See [ROADMAP.md](ROADMAP.md) for planned future milestones.
 ## [Unreleased]
 
 ### Added
+
 - `ROADMAP.md` at workspace root documenting all planned milestones through v1.0.0
+- `iana-cbor/tag_names.toml` — hand-curated CBOR tag name overrides (119 entries); `iana-sync` reads this file at runtime instead of a hard-coded static array
 
 ### Changed
+- `iana-cbor`: removed `tag_names.toml` — tag constant names now have a single source of truth in `src/tags.rs`; `iana-sync` no longer requires a separate override file
+- `tools/iana-sync`: removed `load_tag_name_overrides()`, `TagNamesToml`, and the `overrides` parameter chain; new IANA tags get auto-generated names, developer renames manually in `tags.rs`
+- `tools/iana-sync`: removed `toml` and `serde` dependencies
+- `tools/iana-sync`: `TAG_NAME_OVERRIDES` static array removed; `load_tag_name_overrides()` now reads `iana-cbor/tag_names.toml` — fixes DRY violation (naming data belongs to the crate, not the tool)
+- `tools/iana-sync`: added `toml = "0.8"` and `serde` dependencies for TOML parsing
+- `tools/iana-sync`: `constant_name_for_tags`, `constant_name`, `append_constants`, `update_registry`, `check_registry` now accept an explicit `overrides: &BTreeMap<i128, String>` parameter
 - `iana-cbor`: `simple_values` constants changed from `u64` to `u8` — CBOR simple values are capped at 255 by spec and embedded decoders return `u8`; avoids redundant cast at call site
 - `iana-cbor`: `timescales` constants changed from `u64` to `u8` — same rationale; only values 0 and 1 are assigned
 - `tools/iana-sync`: added `IntegerType::U8` variant; `parse_label` and registry entries updated accordingly

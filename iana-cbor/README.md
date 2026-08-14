@@ -48,6 +48,29 @@ IANA snapshot: **2026-07-20**.
 
 Each module exposes `is_known(label) -> bool`, a `const fn` for membership checks.
 
+## Naming conventions for CBOR tags
+
+Tag constant names follow these rules, in order of priority:
+
+1. **Override map wins.** Hand-curated names in `tools/iana-sync` take precedence over
+auto-generation. Contribute new names there, not by editing `tags.rs` directly.
+2. **Proper nouns and acronyms preserved.** `COSE`, `URI`, `IRI`, `IEEE`, `YANG`,
+`CWT`, `UUID`, `OID`, `MIME`, `JSON`, `IPLD` are kept as-is.
+3. **Strip IANA prose wrappers.** "A CBOR tag that contains a …-map" → keep only the
+payload type name (e.g. `CORIM_MAP`).
+4. **Typed Array tags use the pattern `TYPED_ARRAY_{type}_{endian}`.** Types: `U8`,
+`U16`, `U32`, `U64`, `F16`, `F32`, `F64`, `F128`. Endian: `BE`, `LE`.
+5. **`ur:*` tags use `UR_` prefix** with the `ur:name` component (e.g. `UR_SALT`).
+6. **Strip "see Section X.Y"** and similar trailing prose from descriptions.
+7. **Max 40 characters**, truncated at the last word boundary.
+8. **`TAG_N` is the last resort** — only when no meaningful name can be derived.
+9. **Sentinel tags** (`always invalid`) are named `ALWAYS_INVALID_LABEL_{N}` or
+`ALWAYS_INVALID_U64_MAX`.
+10. **Temporary registrations** keep their name; the doc comment notes the expiry.
+
+To propose a new name: add an entry to `TAG_NAME_OVERRIDES` in
+`tools/iana-sync/src/main.rs` and run `cargo run -p iana-sync -- update`.
+
 ## SUIT-relevant constants
 
 `iana-cbor` is a direct dependency of SUIT manifest parsers and encoders:

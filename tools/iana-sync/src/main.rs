@@ -1,15 +1,5 @@
 use std::{collections::BTreeMap, env, fmt, fs, path::Path};
 
-fn line_indent(source: &str, absolute_start: usize) -> usize {
-    let line_start = source[..absolute_start]
-        .rfind('\n')
-        .map_or(0, |index| index + 1);
-    source[line_start..absolute_start]
-        .chars()
-        .take_while(|character| *character == ' ')
-        .count()
-}
-
 struct Registry {
     name: &'static str,
     url: &'static str,
@@ -317,7 +307,25 @@ fn check_registry(_root: &Path, registry: &Registry) -> Result<String, SyncError
         .collect();
 
     if missing.is_empty() {
-        Ok(format!("ok ({} assigned labels)", expected.len()))
+        let path = _root.join(registry.source);
+        let source = fs::read_to_string(&path).map_err(|error| {
+            SyncError(format!(
+                "{}: cannot read {}: {error}",
+                registry.name,
+                path.display()
+            ))
+        })?;
+        let semantic_differences = semantics_differences(&source, &expected, registry)?;
+        if semantic_differences.is_empty() {
+            Ok(format!("ok ({} assigned labels)", expected.len()))
+        } else {
+            eprintln!(
+                "warning: {} semantics drift:\n{}",
+                registry.name,
+                semantic_differences.join("\n")
+            );
+            Ok(format!("ok ({} assigned labels)", expected.len()))
+        }
     } else {
         let differences: Vec<String> = missing
             .into_iter()
@@ -473,62 +481,74 @@ fn expected_labels(csv: &str, registry: &Registry) -> Result<BTreeMap<i128, Stri
 }
 
 fn source_labels(source: &str, registry: &Registry) -> Result<BTreeMap<i128, String>, SyncError> {
-    let mut labels = BTreeMap::new();
-    let mut remaining = source;
-    let needle = "pub const ";
+    let ast = syn::parse_file(source)
+        .map_err(|e| SyncError(format!("{}: failed to parse source file: {e}", registry.name)))?;
 
-    while let Some(const_start) = remaining.find(needle) {
-        let absolute_start = source.len() - remaining.len() + const_start;
-        let line_indent = line_indent(source, absolute_start);
-        let line_start = source[..absolute_start]
-            .rfind('\n')
-            .map_or(0, |index| index + 1);
-        let line_prefix = &source[line_start..absolute_start];
-        if !line_prefix.trim().is_empty() {
-            remaining = &remaining[const_start + needle.len()..];
-            continue;
-        }
-        if line_indent >= 4 {
-            remaining = &remaining[const_start + needle.len()..];
-            continue;
-        }
-        remaining = &remaining[const_start + needle.len()..];
-        let Some(end) = remaining.find(';') else {
-            break;
-        };
-        let declaration = &remaining[..end];
-        remaining = &remaining[end + 1..];
-        let Some((name, declaration)) = declaration.split_once(':') else {
+    let expected_type = registry.integer.rust_name();
+    let mut labels = BTreeMap::new();
+
+    for item in &ast.items {
+        let syn::Item::Const(c) = item else {
             continue;
         };
-        let name = name.trim();
-        if !name.chars().all(|character| {
-            character.is_ascii_uppercase() || character.is_ascii_digit() || character == '_'
-        }) {
+        if !matches!(c.vis, syn::Visibility::Public(_)) {
             continue;
         }
-        let Some((rust_type, value)) = declaration.split_once('=') else {
-            continue;
+
+        // Validate the declared type matches what this registry expects.
+        let type_name = match c.ty.as_ref() {
+            syn::Type::Path(tp) => tp
+                .path
+                .segments
+                .last()
+                .map(|s| s.ident.to_string())
+                .unwrap_or_default(),
+            _ => continue,
         };
-        if rust_type.trim() != registry.integer.rust_name() {
+        if type_name != expected_type {
             return Err(SyncError(format!(
-                "{}: constant {name} has type {} but expected {}",
+                "{}: constant {} has type {type_name} but expected {expected_type}",
                 registry.name,
-                rust_type.trim(),
-                registry.integer.rust_name()
+                c.ident,
             )));
         }
-        let value = value.trim().trim_end_matches(';').trim();
-        let Some(label) = parse_label(value, registry.integer) else {
+
+        // Extract the numeric value, handling plain integers and negated integers.
+        let value_str: String = match c.expr.as_ref() {
+            syn::Expr::Lit(el) => match &el.lit {
+                syn::Lit::Int(li) => li.to_string(),
+                _ => continue,
+            },
+            syn::Expr::Unary(eu) => {
+                if !matches!(eu.op, syn::UnOp::Neg(_)) {
+                    continue;
+                }
+                match eu.expr.as_ref() {
+                    syn::Expr::Lit(el) => match &el.lit {
+                        syn::Lit::Int(li) => format!("-{li}"),
+                        _ => continue,
+                    },
+                    _ => continue,
+                }
+            }
+            _ => continue,
+        };
+
+        let Some(label) = parse_label(&value_str, registry.integer) else {
             continue;
         };
-        if labels.insert(label, name.to_owned()).is_some() {
-            return Err(SyncError(format!("duplicate Rust label {label} in source")));
+        let name = c.ident.to_string();
+        if labels.insert(label, name.clone()).is_some() {
+            return Err(SyncError(format!(
+                "{}: duplicate constant value {label} in source",
+                registry.name,
+            )));
         }
     }
 
     Ok(labels)
 }
+
 
 fn append_constants(
     source: &str,
@@ -544,16 +564,18 @@ fn append_constants(
 
     for (label, description) in missing {
         let mut name = constant_name(registry, *label, description);
-        let description = doc_description(description);
+        let short_desc = doc_description(&clean_tag_semantics(description));
+        let raw_description = doc_description(description);
         if let Some(existing_label) = used_names.get(&name)
             && existing_label != label
         {
             name = format!("{name}_LABEL_{label}");
         }
         used_names.insert(name.clone(), *label);
+        let source_url = registry.url;
+        let type_name = registry.integer.rust_name();
         additions.push_str(&format!(
-            "/// {description}.\npub const {name}: {} = {label};\n",
-            registry.integer.rust_name()
+            "/// {short_desc}.\n///\n/// IANA tag: `{label}`\n/// IANA semantics: `{raw_description}`\n/// IANA source: <{source_url}>\npub const {name}: {type_name} = {label};\n",
         ));
     }
 
@@ -566,44 +588,70 @@ fn append_constants(
     Ok(updated)
 }
 
-fn constant_name(registry: &Registry, label: i128, description: &str) -> String {
-    match registry.name {
-        "CBOR Tags" => match label {
-            107 => return "SUIT_ENVELOPE".to_owned(),
-            1070 => return "SUIT_MANIFEST".to_owned(),
-            _ => return format!("TAG_{label}"),
-        },
-        "CBOR Simple Values" => match label {
-            20 => return "FALSE".to_owned(),
-            21 => return "TRUE".to_owned(),
-            22 => return "NULL".to_owned(),
-            23 => return "UNDEFINED".to_owned(),
-            _ => return format!("SIMPLE_VALUE_{label}"),
-        },
-        _ => {}
-    }
-
+fn name_from_description(description: &str) -> String {
     let mut name = String::new();
-    let mut separator = false;
-
-    for character in description.chars() {
-        if character.is_ascii_alphanumeric() {
-            if separator && !name.is_empty() {
+    let mut sep = false;
+    for ch in description.chars() {
+        if ch.is_ascii_alphanumeric() {
+            if sep && !name.is_empty() {
                 name.push('_');
             }
-            name.push(character.to_ascii_uppercase());
-            separator = false;
+            name.push(ch.to_ascii_uppercase());
+            sep = false;
         } else {
-            separator = true;
+            sep = true;
         }
     }
-
+    if name.len() > 40 {
+        if let Some(pos) = name[..40].rfind('_') {
+            name.truncate(pos);
+        } else {
+            name.truncate(40);
+        }
+    }
     if name.is_empty() {
-        "LABEL".to_owned()
-    } else if name.as_bytes()[0].is_ascii_digit() {
-        format!("LABEL_{name}")
-    } else {
-        name
+        return String::new();
+    }
+    if name.as_bytes()[0].is_ascii_digit() {
+        return format!("LABEL_{name}");
+    }
+    name
+}
+
+fn clean_tag_semantics(s: &str) -> String {
+    let re_section = s.find("; see Section").unwrap_or(s.len());
+    let s = &s[..re_section];
+    let s = if let Some(pos) = s.find('[') { &s[..pos] } else { s };
+    s.trim().to_owned()
+}
+
+fn constant_name_for_tags(label: i128, description: &str) -> String {
+    let cleaned = clean_tag_semantics(description);
+    let generated = name_from_description(&cleaned);
+    if generated.len() >= 3 {
+        return generated;
+    }
+    format!("TAG_{label}")
+}
+
+fn constant_name(registry: &Registry, label: i128, description: &str) -> String {
+    match registry.name {
+        "CBOR Tags" => constant_name_for_tags(label, description),
+        "CBOR Simple Values" => match label {
+            20 => "FALSE".to_owned(),
+            21 => "TRUE".to_owned(),
+            22 => "NULL".to_owned(),
+            23 => "UNDEFINED".to_owned(),
+            _ => format!("SIMPLE_VALUE_{label}"),
+        },
+        _ => {
+            let generated = name_from_description(description);
+            if generated.is_empty() {
+                "LABEL".to_owned()
+            } else {
+                generated
+            }
+        }
     }
 }
 
@@ -617,6 +665,65 @@ fn doc_description(description: &str) -> String {
         .replace('[', "\\[")
         .replace(']', "\\]")
 }
+
+fn semantics_differences(
+    source: &str,
+    expected: &BTreeMap<i128, String>,
+    registry: &Registry,
+) -> Result<Vec<String>, SyncError> {
+    let mut differences = Vec::new();
+    let mut lines = source.lines().peekable();
+
+    while let Some(line) = lines.next() {
+        let Some(semantics) = line.strip_prefix("/// IANA semantics: `") else {
+            continue;
+        };
+        let Some(semantics) = semantics.strip_suffix('`') else {
+            continue;
+        };
+
+        // Unescape bracket escaping applied by doc_description() before comparing.
+        let semantics = semantics.replace("\\[", "[").replace("\\]", "]")
+            .replace("<https://", "https://").replace(">", "");
+
+        let mut const_line = None;
+        while let Some(next_line) = lines.peek() {
+            let trimmed = next_line.trim();
+            if trimmed.starts_with("///") || trimmed.is_empty() {
+                lines.next();
+                continue;
+            }
+            const_line = lines.next();
+            break;
+        }
+
+        let Some(const_line) = const_line else {
+            continue;
+        };
+        let Some((_, declaration)) = const_line.split_once('=') else {
+            continue;
+        };
+        let value = declaration.trim().trim_end_matches(';').trim();
+        let Some(label) = parse_label(value, registry.integer) else {
+            continue;
+        };
+        let Some(expected_semantics) = expected.get(&label) else {
+            continue;
+        };
+        // Normalise whitespace before comparing — IANA CSV may have literal
+        // newlines in multiline descriptions that doc comments collapse to spaces.
+        let semantics_norm: String = semantics.split_whitespace().collect::<Vec<_>>().join(" ");
+        let expected_norm: String = expected_semantics.split_whitespace().collect::<Vec<_>>().join(" ");
+        if expected_norm != semantics_norm {
+            differences.push(format!(
+                "tag {label}: semantics mismatch\n  source: `{semantics_norm}`\n  csv:    `{expected_norm}`"
+            ));
+        }
+    }
+
+    Ok(differences)
+}
+
 
 fn parse_label(raw: &str, integer: IntegerType) -> Option<i128> {
     let value = raw.trim().parse::<i128>().ok()?;
@@ -783,8 +890,33 @@ mod tests {
             constant_name(&registry, 1, "Payload Fetch"),
             "PAYLOAD_FETCH"
         );
-        assert_eq!(constant_name(&registry, 2, "Result / MAC"), "RESULT_MAC");
-        assert_eq!(constant_name(&registry, 3, "123"), "LABEL_123");
+        assert_eq!(
+            constant_name(&registry, 2, "Result / MAC"),
+            "RESULT_MAC"
+        );
+        assert_eq!(
+            constant_name(&registry, 3, "123"),
+            "LABEL_123"
+        );
+        assert_eq!(
+            constant_name_for_tags(107, "SUIT Envelope"),
+            "SUIT_ENVELOPE"
+        );
+        assert_eq!(
+            constant_name_for_tags(0, "Standard date/time string; see Section 3.4.1"),
+            "STANDARD_DATE_TIME_STRING"
+        );
+        assert_eq!(
+            constant_name_for_tags(61, "CBOR Web Token (CWT)"),
+            "CBOR_WEB_TOKEN_CWT"
+        );
+        assert_eq!(
+            constant_name_for_tags(
+                999,
+                "A very long description that exceeds the forty character limit by quite a lot"
+            ),
+            "A_VERY_LONG_DESCRIPTION_THAT_EXCEEDS"
+        );
     }
 
     #[test]
