@@ -1,82 +1,126 @@
 //! SUIT Commands (IANA registry: suit-commands).
 //!
-//! Reference: RFC-ietf-suit-manifest-34
+//! Reference: [RFC-ietf-suit-manifest-34](https://www.iana.org/go/draft-ietf-suit-manifest-34)
 
-/// SUIT Command labels.
-///
-/// | Label | Name                  |
-/// |-------|-----------------------|
-/// | 0     | Unset Detection       |
-/// | 1     | Vendor Identifier     |
-/// | 2     | Class Identifier      |
-/// | 3     | Image Match           |
-/// | 5     | Component Slot        |
-/// | 6     | Check Content         |
-/// | 7     | Dependency Integrity  |
-/// | 8     | Is Dependency         |
-/// | 11    | Process Dependency    |
-/// | 12    | Set Component Index   |
-/// | 14    | Abort                 |
-/// | 15    | Try Each              |
-/// | 18    | Write Content         |
-/// | 19    | Set Parameters        |
-/// | 20    | Override Parameters   |
-/// | 21    | Fetch                 |
-/// | 22    | Copy                  |
-/// | 23    | Invoke                |
-/// | 24    | Device Identifier     |
-/// | 31    | Swap                  |
-/// | 32    | Run Sequence          |
-/// | 33    | Unlink                |
-/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
-pub const UNSET_DETECTION: i32 = 0;
+
 /// Vendor Identifier.
-pub const VENDOR_IDENTIFIER: i32 = 1;
+const VENDOR_IDENTIFIER: i32 = 1;
 /// Class Identifier.
-pub const CLASS_IDENTIFIER: i32 = 2;
+const CLASS_IDENTIFIER: i32 = 2;
 /// Image Match.
-pub const IMAGE_MATCH: i32 = 3;
+const IMAGE_MATCH: i32 = 3;
 /// Component Slot.
-pub const COMPONENT_SLOT: i32 = 5;
+const COMPONENT_SLOT: i32 = 5;
 /// Check Content.
-pub const CHECK_CONTENT: i32 = 6;
+const CHECK_CONTENT: i32 = 6;
 /// Dependency Integrity.
-pub const DEPENDENCY_INTEGRITY: i32 = 7;
+const DEPENDENCY_INTEGRITY: i32 = 7;
 /// Is Dependency.
-pub const IS_DEPENDENCY: i32 = 8;
+const IS_DEPENDENCY: i32 = 8;
 /// Process Dependency.
-pub const PROCESS_DEPENDENCY: i32 = 11;
+const PROCESS_DEPENDENCY: i32 = 11;
 /// Set Component Index.
-pub const SET_COMPONENT_INDEX: i32 = 12;
+const SET_COMPONENT_INDEX: i32 = 12;
 /// Abort.
-pub const ABORT: i32 = 14;
+const ABORT: i32 = 14;
 /// Try Each.
-pub const TRY_EACH: i32 = 15;
+const TRY_EACH: i32 = 15;
 /// Write Content.
-pub const WRITE_CONTENT: i32 = 18;
+const WRITE_CONTENT: i32 = 18;
 /// Set Parameters.
-pub const SET_PARAMETERS: i32 = 19;
+const SET_PARAMETERS: i32 = 19;
 /// Override Parameters.
-pub const OVERRIDE_PARAMETERS: i32 = 20;
+const OVERRIDE_PARAMETERS: i32 = 20;
 /// Fetch.
-pub const FETCH: i32 = 21;
+const FETCH: i32 = 21;
 /// Copy.
-pub const COPY: i32 = 22;
+const COPY: i32 = 22;
 /// Invoke.
-pub const INVOKE: i32 = 23;
+const INVOKE: i32 = 23;
 /// Device Identifier.
-pub const DEVICE_IDENTIFIER: i32 = 24;
+const DEVICE_IDENTIFIER: i32 = 24;
 /// Swap.
-pub const SWAP: i32 = 31;
+const SWAP: i32 = 31;
 /// Run Sequence.
-pub const RUN_SEQUENCE: i32 = 32;
+const RUN_SEQUENCE: i32 = 32;
 /// Unlink.
-pub const UNLINK: i32 = 33;
+const UNLINK: i32 = 33;
+
+/// A SUIT Command label.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Command(i32);
+
+impl Command {
+    /// Vendor Identifier.
+    pub const VENDOR_IDENTIFIER: Self = Self(VENDOR_IDENTIFIER);
+    /// Class Identifier.
+    pub const CLASS_IDENTIFIER: Self = Self(CLASS_IDENTIFIER);
+    /// Image Match.
+    pub const IMAGE_MATCH: Self = Self(IMAGE_MATCH);
+    /// Component Slot.
+    pub const COMPONENT_SLOT: Self = Self(COMPONENT_SLOT);
+    /// Check Content.
+    pub const CHECK_CONTENT: Self = Self(CHECK_CONTENT);
+    /// Dependency Integrity.
+    pub const DEPENDENCY_INTEGRITY: Self = Self(DEPENDENCY_INTEGRITY);
+    /// Is Dependency.
+    pub const IS_DEPENDENCY: Self = Self(IS_DEPENDENCY);
+    /// Process Dependency.
+    pub const PROCESS_DEPENDENCY: Self = Self(PROCESS_DEPENDENCY);
+    /// Set Component Index.
+    pub const SET_COMPONENT_INDEX: Self = Self(SET_COMPONENT_INDEX);
+    /// Abort.
+    pub const ABORT: Self = Self(ABORT);
+    /// Try Each.
+    pub const TRY_EACH: Self = Self(TRY_EACH);
+    /// Write Content.
+    pub const WRITE_CONTENT: Self = Self(WRITE_CONTENT);
+    /// Set Parameters.
+    pub const SET_PARAMETERS: Self = Self(SET_PARAMETERS);
+    /// Override Parameters.
+    pub const OVERRIDE_PARAMETERS: Self = Self(OVERRIDE_PARAMETERS);
+    /// Fetch.
+    pub const FETCH: Self = Self(FETCH);
+    /// Copy.
+    pub const COPY: Self = Self(COPY);
+    /// Invoke.
+    pub const INVOKE: Self = Self(INVOKE);
+    /// Device Identifier.
+    pub const DEVICE_IDENTIFIER: Self = Self(DEVICE_IDENTIFIER);
+    /// Swap.
+    pub const SWAP: Self = Self(SWAP);
+    /// Run Sequence.
+    pub const RUN_SEQUENCE: Self = Self(RUN_SEQUENCE);
+    /// Unlink.
+    pub const UNLINK: Self = Self(UNLINK);
+
+    /// Returns the raw numeric label.
+    #[must_use]
+    pub const fn as_i32(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<Command> for i32 {
+    fn from(value: Command) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<i32> for Command {
+    type Error = i32;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if is_known(value) {
+            Ok(Self(value))
+        } else {
+            Err(value)
+        }
+    }
+}
 
 /// Returns `true` if `label` is a currently assigned SUIT Command label.
-///
-/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
-/// value, not a valid CBOR map key for encoding.
 #[must_use]
 pub const fn is_known(label: i32) -> bool {
     matches!(

@@ -16,7 +16,6 @@ numbers below reflect feature groupings, not lockstep crate version bumps.
 - [ ] Add `rustfmt.toml` to workspace root
 - [ ] Replace all draft RFC identifiers with final RFC numbers where published; flag remaining drafts explicitly
 - [ ] Document cross-registry label overlap (same integer reused across SUIT registries by design)
-- [ ] Add `UNSET_DETECTION` reference to RFC-ietf-suit-manifest-34 §8.1 in every affected module
 - [ ] Add stable-name override map to `iana-sync` — prevents IANA description changes from silently renaming Rust constants
 - [ ] Fix `iana-sync` fast-check: `Last-Modified` skip must fall back to full CSV hash comparison, not trust date alone
 - [ ] Add `cargo package --dry-run` and `cargo publish --dry-run` to CI for all published crates
@@ -142,7 +141,6 @@ New crate: `iana-rs` (`publish = true`).
 - [ ] Public module paths, constant names, numeric types, and `is_known()` signatures are frozen
 - [ ] Stable-name override map covers all generated names — IANA description changes cannot silently rename a constant
 - [ ] Deprecated IANA assignments kept with `#[deprecated]` doc annotations; never silently removed
-- [ ] Sentinel values (e.g. `UNSET_DETECTION`) excluded from `is_known()` in all registries — documented and tested
 
 ### Tooling and CI
 - [ ] `iana-sync` uses content hash comparison, not `Last-Modified` alone

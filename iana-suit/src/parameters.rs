@@ -1,58 +1,94 @@
 //! SUIT Parameters (IANA registry: suit-parameters).
 //!
-//! Reference: RFC-ietf-suit-manifest-34
+//! Reference: [RFC-ietf-suit-manifest-34](https://www.iana.org/go/draft-ietf-suit-manifest-34)
 
-/// SUIT Parameter labels.
-///
-/// | Label | Name              |
-/// |-------|-------------------|
-/// | 0     | Unset Detection   |
-/// | 1     | Vendor ID         |
-/// | 2     | Class ID          |
-/// | 3     | Image Digest      |
-/// | 5     | Component Slot    |
-/// | 12    | Strict Order      |
-/// | 13    | Soft Failure      |
-/// | 14    | Image Size        |
-/// | 18    | Content           |
-/// | 19    | Encryption Info   |
-/// | 21    | URI               |
-/// | 22    | Source Component  |
-/// | 23    | Invoke Args       |
-/// | 24    | Device ID         |
-/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
-pub const UNSET_DETECTION: i32 = 0;
+
 /// Vendor ID.
-pub const VENDOR_ID: i32 = 1;
+const VENDOR_ID: i32 = 1;
 /// Class ID.
-pub const CLASS_ID: i32 = 2;
+const CLASS_ID: i32 = 2;
 /// Image Digest.
-pub const IMAGE_DIGEST: i32 = 3;
+const IMAGE_DIGEST: i32 = 3;
 /// Component Slot.
-pub const COMPONENT_SLOT: i32 = 5;
+const COMPONENT_SLOT: i32 = 5;
 /// Strict Order.
-pub const STRICT_ORDER: i32 = 12;
+const STRICT_ORDER: i32 = 12;
 /// Soft Failure.
-pub const SOFT_FAILURE: i32 = 13;
+const SOFT_FAILURE: i32 = 13;
 /// Image Size.
-pub const IMAGE_SIZE: i32 = 14;
+const IMAGE_SIZE: i32 = 14;
 /// Content.
-pub const CONTENT: i32 = 18;
+const CONTENT: i32 = 18;
 /// Encryption Info.
-pub const ENCRYPTION_INFO: i32 = 19;
+const ENCRYPTION_INFO: i32 = 19;
 /// URI.
-pub const URI: i32 = 21;
+const URI: i32 = 21;
 /// Source Component.
-pub const SOURCE_COMPONENT: i32 = 22;
+const SOURCE_COMPONENT: i32 = 22;
 /// Invoke Args.
-pub const INVOKE_ARGS: i32 = 23;
+const INVOKE_ARGS: i32 = 23;
 /// Device ID.
-pub const DEVICE_ID: i32 = 24;
+const DEVICE_ID: i32 = 24;
+
+/// A SUIT Parameter label.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Parameter(i32);
+
+impl Parameter {
+    /// Vendor ID.
+    pub const VENDOR_ID: Self = Self(VENDOR_ID);
+    /// Class ID.
+    pub const CLASS_ID: Self = Self(CLASS_ID);
+    /// Image Digest.
+    pub const IMAGE_DIGEST: Self = Self(IMAGE_DIGEST);
+    /// Component Slot.
+    pub const COMPONENT_SLOT: Self = Self(COMPONENT_SLOT);
+    /// Strict Order.
+    pub const STRICT_ORDER: Self = Self(STRICT_ORDER);
+    /// Soft Failure.
+    pub const SOFT_FAILURE: Self = Self(SOFT_FAILURE);
+    /// Image Size.
+    pub const IMAGE_SIZE: Self = Self(IMAGE_SIZE);
+    /// Content.
+    pub const CONTENT: Self = Self(CONTENT);
+    /// Encryption Info.
+    pub const ENCRYPTION_INFO: Self = Self(ENCRYPTION_INFO);
+    /// URI.
+    pub const URI: Self = Self(URI);
+    /// Source Component.
+    pub const SOURCE_COMPONENT: Self = Self(SOURCE_COMPONENT);
+    /// Invoke Args.
+    pub const INVOKE_ARGS: Self = Self(INVOKE_ARGS);
+    /// Device ID.
+    pub const DEVICE_ID: Self = Self(DEVICE_ID);
+
+    /// Returns the raw numeric label.
+    #[must_use]
+    pub const fn as_i32(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<Parameter> for i32 {
+    fn from(value: Parameter) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<i32> for Parameter {
+    type Error = i32;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if is_known(value) {
+            Ok(Self(value))
+        } else {
+            Err(value)
+        }
+    }
+}
 
 /// Returns `true` if `label` is a currently assigned SUIT Parameter label.
-///
-/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
-/// value, not a valid CBOR map key for encoding.
 #[must_use]
 pub const fn is_known(label: i32) -> bool {
     matches!(

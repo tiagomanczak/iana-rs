@@ -807,7 +807,7 @@ mod tests {
     #[test]
     fn parses_quoted_csv_fields_and_skips_ranges() {
         let csv =
-            "Label,Name,Reference\n0,Unset Detection,[RFC]\n1,\"A, B\",[RFC]\n2-4,Unassigned,\n";
+            "Label,Name,Reference\n0,Reserved,[RFC]\n1,\"A, B\",[RFC]\n2-4,Unassigned,\n";
         let labels = expected_labels(
             csv,
             &Registry {
@@ -823,7 +823,7 @@ mod tests {
         )
         .expect("CSV should parse");
 
-        assert_eq!(labels.get(&0), Some(&"Unset Detection".to_owned()));
+        assert_eq!(labels.get(&0), Some(&"Reserved".to_owned()));
         assert_eq!(labels.get(&1), Some(&"A, B".to_owned()));
         assert!(!labels.contains_key(&2));
     }

@@ -1,50 +1,90 @@
 //! SUIT Report Reasons (IANA registry: suit-report-reasons).
 //!
-//! Reference: RFC-ietf-suit-report-19
+//! Reference: [RFC-ietf-suit-report-19](https://www.iana.org/go/draft-ietf-suit-report-19)
 
-/// SUIT Report reason labels.
-///
-/// | Label | Name                              |
-/// |-------|-----------------------------------|
-/// | 0     | Result OK                         |
-/// | 1     | CBOR Parse Failure                |
-/// | 2     | Unsupported COSE Structure or Header |
-/// | 3     | Unsupported COSE Algorithm        |
-/// | 4     | Signature / MAC verification failed |
-/// | 5     | Unsupported SUIT Command          |
-/// | 6     | Unsupported SUIT Component        |
-/// | 7     | Unauthorized SUIT Component       |
-/// | 8     | Unsupported SUIT Parameter        |
-/// | 9     | Severing Unsupported              |
-/// | 10    | Condition Failed                  |
-/// | 11    | Operation Failed                  |
-/// | 12    | Invocation Pending                |
-/// Result OK.
-pub const RESULT_OK: i32 = 0;
+const RESULT_OK: i32 = 0;
 /// CBOR Parse Failure.
-pub const CBOR_PARSE_FAILURE: i32 = 1;
+const CBOR_PARSE_FAILURE: i32 = 1;
 /// Unsupported COSE Structure or Header.
-pub const UNSUPPORTED_COSE_STRUCTURE_OR_HEADER: i32 = 2;
+const UNSUPPORTED_COSE_STRUCTURE_OR_HEADER: i32 = 2;
 /// Unsupported COSE Algorithm.
-pub const UNSUPPORTED_COSE_ALGORITHM: i32 = 3;
+const UNSUPPORTED_COSE_ALGORITHM: i32 = 3;
 /// Signature / MAC verification failed.
-pub const SIGNATURE_MAC_VERIFICATION_FAILED: i32 = 4;
+const SIGNATURE_MAC_VERIFICATION_FAILED: i32 = 4;
 /// Unsupported SUIT Command.
-pub const UNSUPPORTED_SUIT_COMMAND: i32 = 5;
+const UNSUPPORTED_SUIT_COMMAND: i32 = 5;
 /// Unsupported SUIT Component.
-pub const UNSUPPORTED_SUIT_COMPONENT: i32 = 6;
+const UNSUPPORTED_SUIT_COMPONENT: i32 = 6;
 /// Unauthorized SUIT Component.
-pub const UNAUTHORIZED_SUIT_COMPONENT: i32 = 7;
+const UNAUTHORIZED_SUIT_COMPONENT: i32 = 7;
 /// Unsupported SUIT Parameter.
-pub const UNSUPPORTED_SUIT_PARAMETER: i32 = 8;
+const UNSUPPORTED_SUIT_PARAMETER: i32 = 8;
 /// Severing Unsupported.
-pub const SEVERING_UNSUPPORTED: i32 = 9;
+const SEVERING_UNSUPPORTED: i32 = 9;
 /// Condition Failed.
-pub const CONDITION_FAILED: i32 = 10;
+const CONDITION_FAILED: i32 = 10;
 /// Operation Failed.
-pub const OPERATION_FAILED: i32 = 11;
+const OPERATION_FAILED: i32 = 11;
 /// Invocation Pending.
-pub const INVOCATION_PENDING: i32 = 12;
+const INVOCATION_PENDING: i32 = 12;
+
+/// A SUIT Report Reason label.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ReportReason(i32);
+
+impl ReportReason {
+    /// Result OK.
+    pub const RESULT_OK: Self = Self(RESULT_OK);
+    /// CBOR Parse Failure.
+    pub const CBOR_PARSE_FAILURE: Self = Self(CBOR_PARSE_FAILURE);
+    /// Unsupported COSE Structure or Header.
+    pub const UNSUPPORTED_COSE_STRUCTURE_OR_HEADER: Self = Self(UNSUPPORTED_COSE_STRUCTURE_OR_HEADER);
+    /// Unsupported COSE Algorithm.
+    pub const UNSUPPORTED_COSE_ALGORITHM: Self = Self(UNSUPPORTED_COSE_ALGORITHM);
+    /// Signature / MAC verification failed.
+    pub const SIGNATURE_MAC_VERIFICATION_FAILED: Self = Self(SIGNATURE_MAC_VERIFICATION_FAILED);
+    /// Unsupported SUIT Command.
+    pub const UNSUPPORTED_SUIT_COMMAND: Self = Self(UNSUPPORTED_SUIT_COMMAND);
+    /// Unsupported SUIT Component.
+    pub const UNSUPPORTED_SUIT_COMPONENT: Self = Self(UNSUPPORTED_SUIT_COMPONENT);
+    /// Unauthorized SUIT Component.
+    pub const UNAUTHORIZED_SUIT_COMPONENT: Self = Self(UNAUTHORIZED_SUIT_COMPONENT);
+    /// Unsupported SUIT Parameter.
+    pub const UNSUPPORTED_SUIT_PARAMETER: Self = Self(UNSUPPORTED_SUIT_PARAMETER);
+    /// Severing Unsupported.
+    pub const SEVERING_UNSUPPORTED: Self = Self(SEVERING_UNSUPPORTED);
+    /// Condition Failed.
+    pub const CONDITION_FAILED: Self = Self(CONDITION_FAILED);
+    /// Operation Failed.
+    pub const OPERATION_FAILED: Self = Self(OPERATION_FAILED);
+    /// Invocation Pending.
+    pub const INVOCATION_PENDING: Self = Self(INVOCATION_PENDING);
+
+    /// Returns the raw numeric label.
+    #[must_use]
+    pub const fn as_i32(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<ReportReason> for i32 {
+    fn from(value: ReportReason) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<i32> for ReportReason {
+    type Error = i32;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if is_known(value) {
+            Ok(Self(value))
+        } else {
+            Err(value)
+        }
+    }
+}
 
 /// Returns `true` if `label` is a currently assigned SUIT Report Reason label.
 #[must_use]

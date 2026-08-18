@@ -34,160 +34,182 @@ mod tests {
 
     #[test]
     fn envelope_stable() {
-        assert_eq!(envelope::UNSET_DETECTION, 0);
-        assert_eq!(envelope::DELEGATION, 1);
-        assert_eq!(envelope::AUTHENTICATION_WRAPPER, 2);
-        assert_eq!(envelope::MANIFEST, 3);
-        assert_eq!(envelope::DEPENDENCY_RESOLUTION, 15);
-        assert_eq!(envelope::PAYLOAD_FETCH, 16);
-        assert_eq!(envelope::CANDIDATE_VERIFICATION, 18);
-        assert_eq!(envelope::PAYLOAD_INSTALLATION, 20);
-        assert_eq!(envelope::TEXT_DESCRIPTION, 23);
-        assert_eq!(envelope::tag::SUIT_ENVELOPE, 107);
+        use envelope::EnvelopeElement as E;
+        assert_eq!(E::DELEGATION.as_i32(), 1);
+        assert_eq!(E::AUTHENTICATION_WRAPPER.as_i32(), 2);
+        assert_eq!(E::MANIFEST.as_i32(), 3);
+        assert_eq!(E::DEPENDENCY_RESOLUTION.as_i32(), 15);
+        assert_eq!(E::PAYLOAD_FETCH.as_i32(), 16);
+        assert_eq!(E::CANDIDATE_VERIFICATION.as_i32(), 18);
+        assert_eq!(E::PAYLOAD_INSTALLATION.as_i32(), 20);
+        assert_eq!(E::TEXT_DESCRIPTION.as_i32(), 23);
+        assert_eq!(envelope::tag::Tag::SUIT_ENVELOPE.as_i32(), 107);
+        assert_eq!(E::try_from(0), Err(0));
     }
 
     #[test]
     fn manifest_stable() {
-        assert_eq!(manifest::UNSET_DETECTION, 0);
-        assert_eq!(manifest::ENCODING_VERSION, 1);
-        assert_eq!(manifest::SEQUENCE_NUMBER, 2);
-        assert_eq!(manifest::COMMON_DATA, 3);
-        assert_eq!(manifest::REFERENCE_URI, 4);
-        assert_eq!(manifest::MANIFEST_COMPONENT_ID, 5);
-        assert_eq!(manifest::IMAGE_VALIDATION, 7);
-        assert_eq!(manifest::IMAGE_LOADING, 8);
-        assert_eq!(manifest::IMAGE_INVOCATION, 9);
-        assert_eq!(manifest::DEPENDENCY_RESOLUTION, 15);
-        assert_eq!(manifest::PAYLOAD_FETCH, 16);
-        assert_eq!(manifest::CANDIDATE_VERIFICATION, 18);
-        assert_eq!(manifest::PAYLOAD_INSTALLATION, 20);
-        assert_eq!(manifest::TEXT_DESCRIPTION, 23);
-        assert_eq!(manifest::UNINSTALL, 24);
-        assert_eq!(manifest::MANUFACTURER_USAGE_DESCRIPTION, 25);
+        use manifest::ManifestElement as M;
+        assert_eq!(M::ENCODING_VERSION.as_i32(), 1);
+        assert_eq!(M::SEQUENCE_NUMBER.as_i32(), 2);
+        assert_eq!(M::COMMON_DATA.as_i32(), 3);
+        assert_eq!(M::REFERENCE_URI.as_i32(), 4);
+        assert_eq!(M::MANIFEST_COMPONENT_ID.as_i32(), 5);
+        assert_eq!(M::IMAGE_VALIDATION.as_i32(), 7);
+        assert_eq!(M::IMAGE_LOADING.as_i32(), 8);
+        assert_eq!(M::IMAGE_INVOCATION.as_i32(), 9);
+        assert_eq!(M::DEPENDENCY_RESOLUTION.as_i32(), 15);
+        assert_eq!(M::PAYLOAD_FETCH.as_i32(), 16);
+        assert_eq!(M::CANDIDATE_VERIFICATION.as_i32(), 18);
+        assert_eq!(M::PAYLOAD_INSTALLATION.as_i32(), 20);
+        assert_eq!(M::TEXT_DESCRIPTION.as_i32(), 23);
+        assert_eq!(M::UNINSTALL.as_i32(), 24);
+        assert_eq!(M::MANUFACTURER_USAGE_DESCRIPTION.as_i32(), 25);
+        assert_eq!(M::try_from(0), Err(0));
     }
 
     #[test]
     fn common_stable() {
-        assert_eq!(common::UNSET_DETECTION, 0);
-        assert_eq!(common::DEPENDENCIES, 1);
-        assert_eq!(common::COMPONENT_IDENTIFIERS, 2);
-        assert_eq!(common::COMMON_COMMAND_SEQUENCE, 4);
+        use common::CommonElement as C;
+        assert_eq!(C::DEPENDENCIES.as_i32(), 1);
+        assert_eq!(C::COMPONENT_IDENTIFIERS.as_i32(), 2);
+        assert_eq!(C::COMMON_COMMAND_SEQUENCE.as_i32(), 4);
+        assert_eq!(C::try_from(0), Err(0));
     }
 
     #[test]
     fn commands_stable() {
-        assert_eq!(commands::UNSET_DETECTION, 0);
-        assert_eq!(commands::VENDOR_IDENTIFIER, 1);
-        assert_eq!(commands::CLASS_IDENTIFIER, 2);
-        assert_eq!(commands::IMAGE_MATCH, 3);
-        assert_eq!(commands::COMPONENT_SLOT, 5);
-        assert_eq!(commands::CHECK_CONTENT, 6);
-        assert_eq!(commands::DEPENDENCY_INTEGRITY, 7);
-        assert_eq!(commands::IS_DEPENDENCY, 8);
-        assert_eq!(commands::PROCESS_DEPENDENCY, 11);
-        assert_eq!(commands::SET_COMPONENT_INDEX, 12);
-        assert_eq!(commands::ABORT, 14);
-        assert_eq!(commands::TRY_EACH, 15);
-        assert_eq!(commands::WRITE_CONTENT, 18);
-        assert_eq!(commands::SET_PARAMETERS, 19);
-        assert_eq!(commands::OVERRIDE_PARAMETERS, 20);
-        assert_eq!(commands::FETCH, 21);
-        assert_eq!(commands::COPY, 22);
-        assert_eq!(commands::INVOKE, 23);
-        assert_eq!(commands::DEVICE_IDENTIFIER, 24);
-        assert_eq!(commands::SWAP, 31);
-        assert_eq!(commands::RUN_SEQUENCE, 32);
-        assert_eq!(commands::UNLINK, 33);
+        use commands::Command as C;
+        assert_eq!(C::VENDOR_IDENTIFIER.as_i32(), 1);
+        assert_eq!(C::CLASS_IDENTIFIER.as_i32(), 2);
+        assert_eq!(C::IMAGE_MATCH.as_i32(), 3);
+        assert_eq!(C::COMPONENT_SLOT.as_i32(), 5);
+        assert_eq!(C::CHECK_CONTENT.as_i32(), 6);
+        assert_eq!(C::DEPENDENCY_INTEGRITY.as_i32(), 7);
+        assert_eq!(C::IS_DEPENDENCY.as_i32(), 8);
+        assert_eq!(C::PROCESS_DEPENDENCY.as_i32(), 11);
+        assert_eq!(C::SET_COMPONENT_INDEX.as_i32(), 12);
+        assert_eq!(C::ABORT.as_i32(), 14);
+        assert_eq!(C::TRY_EACH.as_i32(), 15);
+        assert_eq!(C::WRITE_CONTENT.as_i32(), 18);
+        assert_eq!(C::SET_PARAMETERS.as_i32(), 19);
+        assert_eq!(C::OVERRIDE_PARAMETERS.as_i32(), 20);
+        assert_eq!(C::FETCH.as_i32(), 21);
+        assert_eq!(C::COPY.as_i32(), 22);
+        assert_eq!(C::INVOKE.as_i32(), 23);
+        assert_eq!(C::DEVICE_IDENTIFIER.as_i32(), 24);
+        assert_eq!(C::SWAP.as_i32(), 31);
+        assert_eq!(C::RUN_SEQUENCE.as_i32(), 32);
+        assert_eq!(C::UNLINK.as_i32(), 33);
+        assert_eq!(C::try_from(0), Err(0));
     }
 
     #[test]
     fn parameters_stable() {
-        assert_eq!(parameters::UNSET_DETECTION, 0);
-        assert_eq!(parameters::VENDOR_ID, 1);
-        assert_eq!(parameters::CLASS_ID, 2);
-        assert_eq!(parameters::IMAGE_DIGEST, 3);
-        assert_eq!(parameters::COMPONENT_SLOT, 5);
-        assert_eq!(parameters::STRICT_ORDER, 12);
-        assert_eq!(parameters::SOFT_FAILURE, 13);
-        assert_eq!(parameters::IMAGE_SIZE, 14);
-        assert_eq!(parameters::CONTENT, 18);
-        assert_eq!(parameters::ENCRYPTION_INFO, 19);
-        assert_eq!(parameters::URI, 21);
-        assert_eq!(parameters::SOURCE_COMPONENT, 22);
-        assert_eq!(parameters::INVOKE_ARGS, 23);
-        assert_eq!(parameters::DEVICE_ID, 24);
+        use parameters::Parameter as P;
+        assert_eq!(P::VENDOR_ID.as_i32(), 1);
+        assert_eq!(P::CLASS_ID.as_i32(), 2);
+        assert_eq!(P::IMAGE_DIGEST.as_i32(), 3);
+        assert_eq!(P::COMPONENT_SLOT.as_i32(), 5);
+        assert_eq!(P::STRICT_ORDER.as_i32(), 12);
+        assert_eq!(P::SOFT_FAILURE.as_i32(), 13);
+        assert_eq!(P::IMAGE_SIZE.as_i32(), 14);
+        assert_eq!(P::CONTENT.as_i32(), 18);
+        assert_eq!(P::ENCRYPTION_INFO.as_i32(), 19);
+        assert_eq!(P::URI.as_i32(), 21);
+        assert_eq!(P::SOURCE_COMPONENT.as_i32(), 22);
+        assert_eq!(P::INVOKE_ARGS.as_i32(), 23);
+        assert_eq!(P::DEVICE_ID.as_i32(), 24);
+        assert_eq!(P::try_from(0), Err(0));
     }
 
     #[test]
     fn text_stable() {
-        assert_eq!(text::UNSET_DETECTION, 0);
-        assert_eq!(text::MANIFEST_DESCRIPTION, 1);
-        assert_eq!(text::UPDATE_DESCRIPTION, 2);
-        assert_eq!(text::MANIFEST_JSON_SOURCE, 3);
-        assert_eq!(text::MANIFEST_YAML_SOURCE, 4);
+        use text::TextValue as T;
+        assert_eq!(T::MANIFEST_DESCRIPTION.as_i32(), 1);
+        assert_eq!(T::UPDATE_DESCRIPTION.as_i32(), 2);
+        assert_eq!(T::MANIFEST_JSON_SOURCE.as_i32(), 3);
+        assert_eq!(T::MANIFEST_YAML_SOURCE.as_i32(), 4);
+        assert_eq!(T::try_from(0), Err(0));
     }
 
     #[test]
     fn component_text_stable() {
-        assert_eq!(component_text::UNSET_DETECTION, 0);
-        assert_eq!(component_text::VENDOR_NAME, 1);
-        assert_eq!(component_text::MODEL_NAME, 2);
-        assert_eq!(component_text::VENDOR_DOMAIN, 3);
-        assert_eq!(component_text::MODEL_INFO, 4);
-        assert_eq!(component_text::COMPONENT_DESCRIPTION, 5);
-        assert_eq!(component_text::COMPONENT_VERSION, 6);
+        use component_text::ComponentTextValue as C;
+        assert_eq!(C::VENDOR_NAME.as_i32(), 1);
+        assert_eq!(C::MODEL_NAME.as_i32(), 2);
+        assert_eq!(C::VENDOR_DOMAIN.as_i32(), 3);
+        assert_eq!(C::MODEL_INFO.as_i32(), 4);
+        assert_eq!(C::COMPONENT_DESCRIPTION.as_i32(), 5);
+        assert_eq!(C::COMPONENT_VERSION.as_i32(), 6);
+        assert_eq!(C::try_from(0), Err(0));
     }
 
     #[test]
     fn report_stable() {
-        assert_eq!(report::NONCE, 2);
-        assert_eq!(report::RECORDS, 3);
-        assert_eq!(report::RESULT, 4);
-        assert_eq!(report::RESULT_CODE, 5);
-        assert_eq!(report::RESULT_RECORD, 6);
-        assert_eq!(report::RESULT_REASON, 7);
-        assert_eq!(report::CAPABILITY_REPORT, 8);
-        assert_eq!(report::REFERENCE, 99);
+        use report::ReportElement as R;
+        assert_eq!(R::NONCE.as_i32(), 2);
+        assert_eq!(R::RECORDS.as_i32(), 3);
+        assert_eq!(R::RESULT.as_i32(), 4);
+        assert_eq!(R::RESULT_CODE.as_i32(), 5);
+        assert_eq!(R::RESULT_RECORD.as_i32(), 6);
+        assert_eq!(R::RESULT_REASON.as_i32(), 7);
+        assert_eq!(R::CAPABILITY_REPORT.as_i32(), 8);
+        assert_eq!(R::REFERENCE.as_i32(), 99);
+        assert_eq!(R::try_from(0), Err(0));
     }
 
     #[test]
     fn record_stable() {
-        assert_eq!(record::MANIFEST_ID, 0);
-        assert_eq!(record::MANIFEST_SECTION, 1);
-        assert_eq!(record::SECTION_OFFSET, 2);
-        assert_eq!(record::COMPONENT_INDEX, 3);
-        assert_eq!(record::RECORD_PROPERTIES, 4);
+        use record::RecordElement as R;
+        assert_eq!(R::MANIFEST_ID.as_i32(), 0);
+        assert_eq!(R::MANIFEST_SECTION.as_i32(), 1);
+        assert_eq!(R::SECTION_OFFSET.as_i32(), 2);
+        assert_eq!(R::COMPONENT_INDEX.as_i32(), 3);
+        assert_eq!(R::RECORD_PROPERTIES.as_i32(), 4);
+        assert_eq!(R::try_from(5), Err(5));
     }
 
     #[test]
     fn report_reasons_stable() {
-        assert_eq!(report_reasons::RESULT_OK, 0);
-        assert_eq!(report_reasons::CBOR_PARSE_FAILURE, 1);
-        assert_eq!(report_reasons::UNSUPPORTED_COSE_STRUCTURE_OR_HEADER, 2);
-        assert_eq!(report_reasons::UNSUPPORTED_COSE_ALGORITHM, 3);
-        assert_eq!(report_reasons::SIGNATURE_MAC_VERIFICATION_FAILED, 4);
-        assert_eq!(report_reasons::UNSUPPORTED_SUIT_COMMAND, 5);
-        assert_eq!(report_reasons::UNSUPPORTED_SUIT_COMPONENT, 6);
-        assert_eq!(report_reasons::UNAUTHORIZED_SUIT_COMPONENT, 7);
-        assert_eq!(report_reasons::UNSUPPORTED_SUIT_PARAMETER, 8);
-        assert_eq!(report_reasons::SEVERING_UNSUPPORTED, 9);
-        assert_eq!(report_reasons::CONDITION_FAILED, 10);
-        assert_eq!(report_reasons::OPERATION_FAILED, 11);
-        assert_eq!(report_reasons::INVOCATION_PENDING, 12);
+        use report_reasons::ReportReason as R;
+        assert_eq!(R::RESULT_OK.as_i32(), 0);
+        assert_eq!(R::CBOR_PARSE_FAILURE.as_i32(), 1);
+        assert_eq!(R::UNSUPPORTED_COSE_STRUCTURE_OR_HEADER.as_i32(), 2);
+        assert_eq!(R::UNSUPPORTED_COSE_ALGORITHM.as_i32(), 3);
+        assert_eq!(R::SIGNATURE_MAC_VERIFICATION_FAILED.as_i32(), 4);
+        assert_eq!(R::UNSUPPORTED_SUIT_COMMAND.as_i32(), 5);
+        assert_eq!(R::UNSUPPORTED_SUIT_COMPONENT.as_i32(), 6);
+        assert_eq!(R::UNAUTHORIZED_SUIT_COMPONENT.as_i32(), 7);
+        assert_eq!(R::UNSUPPORTED_SUIT_PARAMETER.as_i32(), 8);
+        assert_eq!(R::SEVERING_UNSUPPORTED.as_i32(), 9);
+        assert_eq!(R::CONDITION_FAILED.as_i32(), 10);
+        assert_eq!(R::OPERATION_FAILED.as_i32(), 11);
+        assert_eq!(R::INVOCATION_PENDING.as_i32(), 12);
+        assert_eq!(R::try_from(13), Err(13));
     }
 
     #[test]
     fn capability_report_stable() {
-        assert_eq!(capability_report::COMPONENTS, 1);
-        assert_eq!(capability_report::COMMANDS, 2);
-        assert_eq!(capability_report::PARAMETERS, 3);
-        assert_eq!(capability_report::CRYPTOGRAPHIC_ALGORITHMS, 4);
-        assert_eq!(capability_report::ENVELOPE_ELEMENTS, 5);
-        assert_eq!(capability_report::MANIFEST_ELEMENTS, 6);
-        assert_eq!(capability_report::COMMON_ELEMENTS, 7);
-        assert_eq!(capability_report::TEXT_ELEMENTS, 8);
-        assert_eq!(capability_report::COMPONENT_TEXT_ELEMENTS, 9);
-        assert_eq!(capability_report::DEPENDENCY_CAPABILITIES, 10);
+        use capability_report::CapabilityReportElement as C;
+        assert_eq!(C::COMPONENTS.as_i32(), 1);
+        assert_eq!(C::COMMANDS.as_i32(), 2);
+        assert_eq!(C::PARAMETERS.as_i32(), 3);
+        assert_eq!(C::CRYPTOGRAPHIC_ALGORITHMS.as_i32(), 4);
+        assert_eq!(C::ENVELOPE_ELEMENTS.as_i32(), 5);
+        assert_eq!(C::MANIFEST_ELEMENTS.as_i32(), 6);
+        assert_eq!(C::COMMON_ELEMENTS.as_i32(), 7);
+        assert_eq!(C::TEXT_ELEMENTS.as_i32(), 8);
+        assert_eq!(C::COMPONENT_TEXT_ELEMENTS.as_i32(), 9);
+        assert_eq!(C::DEPENDENCY_CAPABILITIES.as_i32(), 10);
+    }
+
+    #[test]
+    fn capability_report_try_from() {
+        use capability_report::CapabilityReportElement as C;
+        assert_eq!(C::try_from(1), Ok(C::COMPONENTS));
+        assert_eq!(C::try_from(99), Err(99));
+        assert_eq!(i32::from(C::COMPONENTS), 1);
     }
 
     #[test]

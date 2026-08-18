@@ -1,64 +1,101 @@
 //! SUIT Manifest Elements (IANA registry: suit-manifest-elements).
 //!
-//! Reference: RFC-ietf-suit-manifest-34
+//! Reference: [RFC-ietf-suit-manifest-34](https://www.iana.org/go/draft-ietf-suit-manifest-34)
 
-/// SUIT Manifest element labels.
-///
-/// | Label | Name                        |
-/// |-------|-----------------------------|
-/// | 0     | Unset Detection             |
-/// | 1     | Encoding Version            |
-/// | 2     | Sequence Number             |
-/// | 3     | Common Data                 |
-/// | 4     | Reference URI               |
-/// | 5     | Manifest Component ID       |
-/// | 7     | Image Validation            |
-/// | 8     | Image Loading               |
-/// | 9     | Image Invocation            |
-/// | 15    | Dependency Resolution       |
-/// | 16    | Payload Fetch               |
-/// | 18    | Candidate Verification      |
-/// | 20    | Payload Installation        |
-/// | 23    | Text Description            |
-/// | 24    | Uninstall                   |
-/// | 25    | Manufacturer Usage Desc.    |
-/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
-pub const UNSET_DETECTION: i32 = 0;
 /// Encoding Version.
-pub const ENCODING_VERSION: i32 = 1;
+const ENCODING_VERSION: i32 = 1;
 /// Sequence Number.
-pub const SEQUENCE_NUMBER: i32 = 2;
+const SEQUENCE_NUMBER: i32 = 2;
 /// Common Data.
-pub const COMMON_DATA: i32 = 3;
+const COMMON_DATA: i32 = 3;
 /// Reference URI.
-pub const REFERENCE_URI: i32 = 4;
+const REFERENCE_URI: i32 = 4;
 /// Manifest Component ID.
-pub const MANIFEST_COMPONENT_ID: i32 = 5;
+const MANIFEST_COMPONENT_ID: i32 = 5;
 /// Image Validation.
-pub const IMAGE_VALIDATION: i32 = 7;
+const IMAGE_VALIDATION: i32 = 7;
 /// Image Loading.
-pub const IMAGE_LOADING: i32 = 8;
+const IMAGE_LOADING: i32 = 8;
 /// Image Invocation.
-pub const IMAGE_INVOCATION: i32 = 9;
+const IMAGE_INVOCATION: i32 = 9;
 /// Dependency Resolution.
-pub const DEPENDENCY_RESOLUTION: i32 = 15;
+const DEPENDENCY_RESOLUTION: i32 = 15;
 /// Payload Fetch.
-pub const PAYLOAD_FETCH: i32 = 16;
+const PAYLOAD_FETCH: i32 = 16;
 /// Candidate Verification.
-pub const CANDIDATE_VERIFICATION: i32 = 18;
+const CANDIDATE_VERIFICATION: i32 = 18;
 /// Payload Installation.
-pub const PAYLOAD_INSTALLATION: i32 = 20;
+const PAYLOAD_INSTALLATION: i32 = 20;
 /// Text Description.
-pub const TEXT_DESCRIPTION: i32 = 23;
+const TEXT_DESCRIPTION: i32 = 23;
 /// Uninstall.
-pub const UNINSTALL: i32 = 24;
+const UNINSTALL: i32 = 24;
 /// Manufacturer Usage Description (MUD).
-pub const MANUFACTURER_USAGE_DESCRIPTION: i32 = 25;
+const MANUFACTURER_USAGE_DESCRIPTION: i32 = 25;
+
+/// A SUIT Manifest Element label.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct ManifestElement(i32);
+
+impl ManifestElement {
+    /// Encoding Version.
+    pub const ENCODING_VERSION: Self = Self(ENCODING_VERSION);
+    /// Sequence Number.
+    pub const SEQUENCE_NUMBER: Self = Self(SEQUENCE_NUMBER);
+    /// Common Data.
+    pub const COMMON_DATA: Self = Self(COMMON_DATA);
+    /// Reference URI.
+    pub const REFERENCE_URI: Self = Self(REFERENCE_URI);
+    /// Manifest Component ID.
+    pub const MANIFEST_COMPONENT_ID: Self = Self(MANIFEST_COMPONENT_ID);
+    /// Image Validation.
+    pub const IMAGE_VALIDATION: Self = Self(IMAGE_VALIDATION);
+    /// Image Loading.
+    pub const IMAGE_LOADING: Self = Self(IMAGE_LOADING);
+    /// Image Invocation.
+    pub const IMAGE_INVOCATION: Self = Self(IMAGE_INVOCATION);
+    /// Dependency Resolution.
+    pub const DEPENDENCY_RESOLUTION: Self = Self(DEPENDENCY_RESOLUTION);
+    /// Payload Fetch.
+    pub const PAYLOAD_FETCH: Self = Self(PAYLOAD_FETCH);
+    /// Candidate Verification.
+    pub const CANDIDATE_VERIFICATION: Self = Self(CANDIDATE_VERIFICATION);
+    /// Payload Installation.
+    pub const PAYLOAD_INSTALLATION: Self = Self(PAYLOAD_INSTALLATION);
+    /// Text Description.
+    pub const TEXT_DESCRIPTION: Self = Self(TEXT_DESCRIPTION);
+    /// Uninstall.
+    pub const UNINSTALL: Self = Self(UNINSTALL);
+    /// Manufacturer Usage Description (MUD).
+    pub const MANUFACTURER_USAGE_DESCRIPTION: Self = Self(MANUFACTURER_USAGE_DESCRIPTION);
+
+    /// Returns the raw numeric label.
+    #[must_use]
+    pub const fn as_i32(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<ManifestElement> for i32 {
+    fn from(value: ManifestElement) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<i32> for ManifestElement {
+    type Error = i32;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if is_known(value) {
+            Ok(Self(value))
+        } else {
+            Err(value)
+        }
+    }
+}
 
 /// Returns `true` if `label` is a currently assigned SUIT Manifest Element label.
-///
-/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
-/// value, not a valid CBOR map key for encoding.
 #[must_use]
 pub const fn is_known(label: i32) -> bool {
     matches!(

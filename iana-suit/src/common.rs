@@ -1,28 +1,54 @@
 //! SUIT Common Elements (IANA registry: suit-common-elements).
 //!
-//! Reference: RFC-ietf-suit-manifest-34
+//! Reference: [RFC-ietf-suit-manifest-34](https://www.iana.org/go/draft-ietf-suit-manifest-34)
 
-/// SUIT Common element labels.
-///
-/// | Label | Name                   |
-/// |-------|------------------------|
-/// | 0     | Unset Detection        |
-/// | 1     | Dependencies           |
-/// | 2     | Component Identifiers  |
-/// | 4     | Common Command Sequence|
-/// Sentinel value indicating an unset field. **Not a valid CBOR map key for encoding.**
-pub const UNSET_DETECTION: i32 = 0;
+
 /// Dependencies.
-pub const DEPENDENCIES: i32 = 1;
+const DEPENDENCIES: i32 = 1;
 /// Component Identifiers.
-pub const COMPONENT_IDENTIFIERS: i32 = 2;
+const COMPONENT_IDENTIFIERS: i32 = 2;
 /// Common Command Sequence.
-pub const COMMON_COMMAND_SEQUENCE: i32 = 4;
+const COMMON_COMMAND_SEQUENCE: i32 = 4;
+
+/// A SUIT Common Element label.
+#[repr(transparent)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct CommonElement(i32);
+
+impl CommonElement {
+    /// Dependencies.
+    pub const DEPENDENCIES: Self = Self(DEPENDENCIES);
+    /// Component Identifiers.
+    pub const COMPONENT_IDENTIFIERS: Self = Self(COMPONENT_IDENTIFIERS);
+    /// Common Command Sequence.
+    pub const COMMON_COMMAND_SEQUENCE: Self = Self(COMMON_COMMAND_SEQUENCE);
+
+    /// Returns the raw numeric label.
+    #[must_use]
+    pub const fn as_i32(self) -> i32 {
+        self.0
+    }
+}
+
+impl From<CommonElement> for i32 {
+    fn from(value: CommonElement) -> Self {
+        value.0
+    }
+}
+
+impl TryFrom<i32> for CommonElement {
+    type Error = i32;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        if is_known(value) {
+            Ok(Self(value))
+        } else {
+            Err(value)
+        }
+    }
+}
 
 /// Returns `true` if `label` is a currently assigned SUIT Common Element label.
-///
-/// `UNSET_DETECTION` (value `0`) is intentionally excluded — it is a sentinel
-/// value, not a valid CBOR map key for encoding.
 #[must_use]
 pub const fn is_known(label: i32) -> bool {
     matches!(

@@ -45,7 +45,7 @@ See [ROADMAP.md](ROADMAP.md) for planned future milestones.
 #### `iana-suit`
 - 11 SUIT registry modules fully populated from IANA snapshot 2026-02-17: `envelope`, `manifest`, `common`, `commands`, `parameters`, `text`, `component_text`, `report`, `record`, `report_reasons`, `capability_report`
 - All labels typed as `i32`
-- `is_known(label: i32) -> bool` `const fn` predicate in every module; `UNSET_DETECTION` (value `0`) intentionally excluded — it is a sentinel, not a valid CBOR map key (RFC-ietf-suit-manifest-34 §8.1)
+- `is_known(label: i32) -> bool` `const fn` predicate in every module
 - `IANA_SNAPSHOT: &str` constant at crate root
 - Exhaustive per-module regression tests for all constant values
 - `#![no_std]`, `#![forbid(unsafe_code)]`

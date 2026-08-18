@@ -55,12 +55,6 @@ IANA snapshot: **2026-02-17**.
 Each module also exposes `is_known(label: i32) -> bool`, a `const fn` that returns
 `true` if the integer is a currently assigned label in that registry.
 
-## Sentinel value
-
-Label `0` (`UNSET_DETECTION`) is registered across multiple SUIT registries as a
-sentinel for detecting unset fields (RFC-ietf-suit-manifest-34, Section 8.1). It
-is **not a valid CBOR map key for encoding** and is excluded from `is_known()`.
-
 ## Versioning
 
 Cargo semver is the compatibility contract:
